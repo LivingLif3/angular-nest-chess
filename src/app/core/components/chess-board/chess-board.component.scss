@@ -1,0 +1,20 @@
+.columns {
+  height: var(--cell-size);
+  width: calc(var(--cell-size) * 8);
+  display: flex;
+}
+
+.row {
+  display: flex;
+  width: calc(var(--cell-size) * 8);
+  height: var(--cell-size);
+}
+
+.board {
+  display: flex;
+  flex-direction: column-reverse;
+}
+
+.dot {
+
+}

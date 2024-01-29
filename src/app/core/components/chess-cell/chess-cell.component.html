@@ -1,0 +1,33 @@
+<div class="cell" appCellColor appCellDot [active]="getActiveStatus()" [color]="color" [cellInfo]="figure"
+     (click)="move()"
+>
+    <ng-container *ngIf="figure">
+        <ng-container [ngSwitch]="figure!.type!">
+            <app-pawn *ngSwitchCase="'PAWN'"
+                      [color]="figure!.color!"
+                      [figure]="figure"
+            >
+            </app-pawn>
+            <app-rook *ngSwitchCase="'ROOK'"
+                      [color]="figure!.color!"
+                      [figure]="figure">
+            </app-rook>
+            <app-knight *ngSwitchCase="'KNIGHT'"
+                        [color]="figure!.color!"
+                        [figure]="figure">
+            </app-knight>
+            <app-bishop *ngSwitchCase="'BISHOP'"
+                        [color]="figure!.color!"
+                        [figure]="figure">
+            </app-bishop>
+            <app-queen *ngSwitchCase="'QUEEN'"
+                       [color]="figure!.color!"
+                       [figure]="figure">
+            </app-queen>
+            <app-king *ngSwitchCase="'KING'"
+                      [color]="figure!.color!"
+                      [figure]="figure">
+            </app-king>
+        </ng-container>
+    </ng-container>
+</div>
