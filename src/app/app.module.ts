@@ -3,7 +3,6 @@ import { BrowserModule } from '@angular/platform-browser';
 
 import { AppComponent } from './app.component';
 import {ChessBoardComponent} from "./core/components/chess-board/chess-board.component";
-import { CellColorDirective } from './core/directives/cell-color/cell-color.directive';
 
 @NgModule({
   declarations: [
@@ -14,6 +13,8 @@ import { CellColorDirective } from './core/directives/cell-color/cell-color.dire
     ChessBoardComponent
   ],
   providers: [],
+  exports: [
+  ],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

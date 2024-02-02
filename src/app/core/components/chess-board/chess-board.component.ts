@@ -17,8 +17,6 @@ import {ChessBoardService} from "../../services/chess-board.service";
 })
 export class ChessBoardComponent {
 
-  numbers = [0, 1, 2, 3, 4, 5, 6, 7]
-
   boardFigures = this.boardService.board
 
   colors: any = {

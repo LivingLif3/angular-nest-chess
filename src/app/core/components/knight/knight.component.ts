@@ -37,6 +37,7 @@ export class KnightComponent implements OnInit{
         filter(figure => figure?.id === this.figure.id)
     ).subscribe(figure => {
       this.boardService.hideAllDots()
+      this.boardService.hideAllAttackCircles()
       this.showDots()
     })
 
@@ -46,26 +47,31 @@ export class KnightComponent implements OnInit{
       const coordinates = this.boardService.getCoordinatesById(this.figure.id!)
       const listOfMoves = this.formListOfCoords(coordinates)
       this.bitBoardService.updateBitBoardAccordingColor(trigger?.color!, listOfMoves)
-      // this.bitBoardService.bitBoard.update(value => {
-      //   const coordinates = this.boardService.getCoordinatesById(this.figure.id!)
-      //   const listOfMoves = this.formListOfCoords(coordinates)
-      //   for(let move of listOfMoves) {
-      //     value[move.i][move.j] = 1
-      //   }
-      //   return [...value]
-      // })
+    })
+
+    this.bitBoardService.checkMoveTrigger$.pipe(
+        filter(trigger => trigger !== null && trigger.moveInfo.color === this.color && trigger.moveInfo.status === 'moved' && trigger.moveInfo.id !== this.figure.id!)
+    ).subscribe((trigger) => {
+      const coordinates = this.boardService.getCoordinatesById(this.figure.id!)
+      const listOfMoves = this.formListOfCoords(coordinates)
+      this.bitBoardService.updateCheckBoardAccordingColor(trigger?.moveInfo.color!, listOfMoves)
     })
   }
 
   showDots() {
-    let coordinates = this.boardService.getCoordinatesById(this.figure.id!)
-    let listOfPossibleMoves = this.formListOfCoords(coordinates);
-    listOfPossibleMoves = listOfPossibleMoves.filter(
+    const coordinates = this.boardService.getCoordinatesById(this.figure.id!)
+    const listOfPossibleMoves = this.formListOfCoords(coordinates);
+    const listOfPossibleMovesWithoutFigures = listOfPossibleMoves.filter(
         move => !this.boardService.board[move.i][move.j].figure
     )
-    for(let move of listOfPossibleMoves) {
+    const attackMoves = listOfPossibleMoves.filter(el => this.boardService.board[el.i][el.j].figure
+        && this.boardService.board[el.i][el.j].figure !== FiguresType.KING)
+
+    for(let move of listOfPossibleMovesWithoutFigures) {
       this.boardService.board[move.i][move.j] = { ...this.boardService.board[move.i][move.j], active: true }
     }
+
+    this.boardService.showAttackMoves(attackMoves, this.color)
   }
 
   formListOfCoords(coordinates: ICoordinates) {

@@ -53,6 +53,7 @@ export class KingComponent implements OnInit {
                 }))
             }
             this.boardService.hideAllDots()
+            this.boardService.hideAllAttackCircles()
             this.showDots()
         })
 
@@ -61,8 +62,17 @@ export class KingComponent implements OnInit {
         ).subscribe(trigger => {
             const coordinates = this.boardService.getCoordinatesById(this.figure.id!)
             const listOfMoves = this.formGeneralMoves(coordinates)
-            console.log(listOfMoves)
             this.bitBoardService.updateBitBoardAccordingColor(trigger?.color!, listOfMoves.filter(
+                move => move.i >= 0 && move.i < 8 && move.j >= 0 && move.j < 8
+            ))
+        })
+
+        this.bitBoardService.checkMoveTrigger$.pipe(
+            filter(trigger => trigger !== null && trigger.moveInfo.color === this.color && trigger.moveInfo.status === 'moved' && trigger.moveInfo.id !== this.figure.id!)
+        ).subscribe((trigger) => {
+            const coordinates = this.boardService.getCoordinatesById(this.figure.id!)
+            const listOfMoves = this.formGeneralMoves(coordinates)
+            this.bitBoardService.updateCheckBoardAccordingColor(trigger?.moveInfo.color!, listOfMoves.filter(
                 move => move.i >= 0 && move.i < 8 && move.j >= 0 && move.j < 8
             ))
         })
@@ -71,9 +81,10 @@ export class KingComponent implements OnInit {
     showDots() {
         let coordinates = this.boardService.getCoordinatesById(this.figure.id!)
         let listOfPossibleMoves = this.formListOfCoords(coordinates);
-        for (let move of listOfPossibleMoves) {
+        for (let move of listOfPossibleMoves.filter(move => !this.boardService.board[move.i][move.j].figure && this.boardService.board[move.i][move.j].figure?.type !== FiguresType.KING)) {
             this.boardService.board[move.i][move.j] = {...this.boardService.board[move.i][move.j], active: true}
         }
+        this.color && this.boardService.showAttackMoves(listOfPossibleMoves, this.color)
     }
 
     formListOfCoords(coordinates: ICoordinates) {
@@ -88,7 +99,7 @@ export class KingComponent implements OnInit {
         ]
 
         return listOfCoordinates.filter(
-            move => move.i >= 0 && move.i < 8 && move.j >= 0 && move.j < 8 && !this.boardService.board[move.i][move.j].figure && this.boardService.board[move.i][move.j].figure?.type !== FiguresType.KING
+            move => move.i >= 0 && move.i < 8 && move.j >= 0 && move.j < 8
         )
     }
 
@@ -109,10 +120,15 @@ export class KingComponent implements OnInit {
     }
 
     formCastlingMovesForWhite(coordinates: ICoordinates) {
-        let listOfCoordinates: ICoordinates[] = []
+        let rightCastlingCoords: ICoordinates[] = []
+        let leftCastlingCoords: ICoordinates[] = []
         if (this.castlingService.checkWhiteCastlingRightRook()) {
             for (let j = coordinates.j + 1; j <= coordinates.j + 2; j++) {
-                listOfCoordinates = [...listOfCoordinates,
+                if(this.boardService.board[coordinates.i][j].figure) {
+                    rightCastlingCoords = []
+                    break;
+                }
+                rightCastlingCoords = [...rightCastlingCoords,
                     {
                         i: coordinates.i,
                         j
@@ -122,7 +138,11 @@ export class KingComponent implements OnInit {
         }
         if (this.castlingService.checkWhiteCastlingLeftRook()) {
             for (let j = coordinates.j - 1; j >= coordinates.j - 2; j--) {
-                listOfCoordinates = [...listOfCoordinates,
+                if(this.boardService.board[coordinates.i][j].figure) {
+                    leftCastlingCoords = []
+                    break;
+                }
+                leftCastlingCoords = [...leftCastlingCoords,
                     {
                         i: coordinates.i,
                         j
@@ -130,31 +150,40 @@ export class KingComponent implements OnInit {
                 ]
             }
         }
-        return listOfCoordinates
+        return [...leftCastlingCoords, ...rightCastlingCoords]
     }
 
     formCastlingMovesForBlack(coordinates: ICoordinates) {
-        let listOfCoordinates: ICoordinates[] = []
+        let rightCastlingCoords: ICoordinates[] = []
+        let leftCastlingCoords: ICoordinates[] = []
         if (this.castlingService.checkBlackCastlingRightRook()) {
-            for (let i = coordinates.i - 1; i <= coordinates.i - 2; i--) {
-                listOfCoordinates = [...listOfCoordinates,
+            for (let j = coordinates.j - 1; j >= coordinates.j - 2; j--) {
+                if(this.boardService.board[coordinates.i][j].figure) {
+                    rightCastlingCoords = []
+                    break;
+                }
+                rightCastlingCoords = [...rightCastlingCoords,
                     {
-                        i,
-                        j: coordinates.j
+                        i: coordinates.i,
+                        j
                     }
                 ]
             }
         }
-        if (this.castlingService.checkWhiteCastlingLeftRook()) {
-            for (let i = coordinates.i + 1; i <= coordinates.i + 2; i++) {
-                listOfCoordinates = [...listOfCoordinates,
+        if (this.castlingService.checkBlackCastlingLeftRook()) {
+            for (let j = coordinates.j + 1; j <= coordinates.j + 2; j++) {
+                if(this.boardService.board[coordinates.i][j].figure) {
+                    leftCastlingCoords = []
+                    break;
+                }
+                leftCastlingCoords = [...leftCastlingCoords,
                     {
-                        i,
-                        j: coordinates.j
+                        i: coordinates.i,
+                        j
                     }
                 ]
             }
         }
-        return listOfCoordinates
+        return [...leftCastlingCoords, ...rightCastlingCoords]
     }
 }

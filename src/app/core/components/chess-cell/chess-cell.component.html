@@ -1,4 +1,4 @@
-<div class="cell" appCellColor appCellDot [active]="getActiveStatus()" [color]="color" [cellInfo]="figure"
+<div class="cell" appCellColor appCellDot appCellAttackCircle [attack]="getAttackStatus()" [active]="getActiveStatus()" [color]="color" [cellInfo]="figure"
      (click)="move()"
 >
     <ng-container *ngIf="figure">

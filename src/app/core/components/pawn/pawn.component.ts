@@ -16,7 +16,6 @@ import {FigureInfo} from "../../types/figure-info";
 import {ShowDotsService} from "../../services/show-dots.service";
 import {filter, Subject, takeUntil} from "rxjs";
 import {BitBoardService} from "../../services/bit-board.service";
-import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 
 @Component({
   selector: 'app-pawn',
@@ -26,7 +25,7 @@ import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
   styleUrls: ['./pawn.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class PawnComponent implements OnInit, OnChanges, OnDestroy {
+export class PawnComponent implements OnInit, OnDestroy {
   @Input() color!: Colors
 
   @Input() figure!: Partial<FigureInfo>
@@ -49,7 +48,6 @@ export class PawnComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   ngOnInit() {
-    console.log(this.figure.id, "INIT ID")
     this.startCoordinateY = this.color === Colors.WHITE ? 1 : 6;
 
     this.imgPath = `${this.color + FiguresType.PAWN}.png`
@@ -57,6 +55,7 @@ export class PawnComponent implements OnInit, OnChanges, OnDestroy {
       let coordinates = this.boardService.getCoordinatesById(this.figure.id!);
       if(figure?.id === this.figure.id) {
         this.boardService.hideAllDots()
+        this.boardService.hideAllAttackCircles()
         if(coordinates.i !== this.startCoordinateY) {
           this.firstMove = false;
         }
@@ -65,6 +64,7 @@ export class PawnComponent implements OnInit, OnChanges, OnDestroy {
         } else {
           this.showDotsWrapper(1)
         }
+        this.showAttackMoves(coordinates)
         this.ref.markForCheck()
       }
     })
@@ -73,29 +73,19 @@ export class PawnComponent implements OnInit, OnChanges, OnDestroy {
         takeUntil(this.ngUnsubscribe),
         filter(trigger => trigger !== null && trigger.color === this.color && trigger.status === 'moved' && trigger.id !== this.figure.id!)
     ).subscribe((trigger) => {
-      console.log(trigger, "TRIGGER")
-      console.log(this.figure, "FIGURE")
-      console.log(this.boardService.board, "HERE")
       const coordinates = this.boardService.getCoordinatesById(this.figure.id!)
-      console.log(coordinates)
       const listOfMoves = this.formListOfAttackMovesWrapper(coordinates)
-      console.log(listOfMoves)
       this.bitBoardService.updateBitBoardAccordingColor(trigger?.color!, listOfMoves)
-      // this.bitBoardService.bitBoard.update(value => {
-      //   const coordinates = this.boardService.getCoordinatesById(this.figure.id!)
-      //   const listOfMoves = this.formListOfAttackMovesWrapper(coordinates)
-      //   for(let move of listOfMoves) {
-      //     if(move.j !== -1) value[move.i][move.j] = 1
-      //   }
-      //   return [...value]
-      // })
     })
-  }
 
-  ngOnChanges(changes: SimpleChanges) {
-    // if (changes['figure']) {
-    //   console.log(changes['figure'])
-    // }
+    this.bitBoardService.checkMoveTrigger$.pipe(
+        takeUntil(this.ngUnsubscribe),
+        filter(trigger => trigger !== null && trigger.moveInfo.color === this.color && trigger.moveInfo.status === 'moved' && trigger.moveInfo.id !== this.figure.id!)
+    ).subscribe((trigger) => {
+      const coordinates = this.boardService.getCoordinatesById(this.figure.id!)
+      const listOfMoves = this.formListOfAttackMovesWrapper(coordinates)
+      this.bitBoardService.updateCheckBoardAccordingColor(trigger?.moveInfo.color!, listOfMoves)
+    })
   }
 
   showDotsWrapper(count: number) {
@@ -105,6 +95,11 @@ export class PawnComponent implements OnInit, OnChanges, OnDestroy {
     } else {
       this.showDotsBlack(count, coordinates);
     }
+  }
+
+  showAttackMoves(coordinates: ICoordinates) {
+    const attackMoves = this.formListOfAttackMovesWrapper(coordinates)
+    this.boardService.showAttackMoves(attackMoves, this.figure?.color!)
   }
 
   showDotsWhite(count: number, coordinates: ICoordinates) {
@@ -175,8 +170,6 @@ export class PawnComponent implements OnInit, OnChanges, OnDestroy {
   ngOnDestroy() {
     this.ngUnsubscribe.next('')
     this.ngUnsubscribe.complete()
-    console.log(this.figure.id)
-    console.log('DESTROY')
   }
 
 }

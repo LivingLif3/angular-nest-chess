@@ -37,6 +37,7 @@ export class BishopComponent implements OnInit {
             filter(figure => figure?.id === this.figure.id)
         ).subscribe(figure => {
             this.boardService.hideAllDots()
+            this.boardService.hideAllAttackCircles()
             this.showDots()
         })
 
@@ -44,43 +45,45 @@ export class BishopComponent implements OnInit {
             filter(trigger => trigger !== null && trigger.color === this.color && trigger.status === 'moved' && trigger.id !== this.figure.id!)
         ).subscribe((trigger) => {
             const coordinates = this.boardService.getCoordinatesById(this.figure.id!)
-            const listOfMoves = this.formListOfCoords(coordinates)
+            const listOfMoves = this.formListOfCoords(this.boardService.board, coordinates)
             this.bitBoardService.updateBitBoardAccordingColor(trigger?.color!, [...listOfMoves.possibleMoves,
                 ...listOfMoves.attackMoves])
-            // this.bitBoardService.bitBoard.update(value => {
-            //     const coordinates = this.boardService.getCoordinatesById(this.figure.id!)
-            //     const listOfMoves = this.formListOfCoords(coordinates)
-            //     for (let move of [...listOfMoves.possibleMoves, ...listOfMoves.attackMoves]) {
-            //         value[move.i][move.j] = 1
-            //     }
-            //     return [...value]
-            // })
+        })
+
+        this.bitBoardService.checkMoveTrigger$.pipe(
+            filter(trigger => trigger !== null && trigger.moveInfo.color === this.color && trigger.moveInfo.status === 'moved' && trigger.moveInfo.id !== this.figure.id!)
+        ).subscribe((trigger) => {
+            const coordinates = this.boardService.getCoordinatesById(this.figure.id!)
+            const listOfMoves = this.formListOfCoords(trigger?.board, coordinates)
+            this.bitBoardService.updateCheckBoardAccordingColor(trigger?.moveInfo.color!, [...listOfMoves.possibleMoves,
+                ...listOfMoves.attackMoves])
         })
     }
 
     showDots() {
         let coordinates = this.boardService.getCoordinatesById(this.figure.id!)
-        const listOfPossibleMoves = this.formListOfCoords(coordinates)
+        const listOfPossibleMoves = this.formListOfCoords(this.boardService.board, coordinates)
         for (let move of listOfPossibleMoves.possibleMoves) {
             this.boardService.board[move.i][move.j] = {...this.boardService.board[move.i][move.j], active: true}
         }
+        this.boardService.showAttackMoves(listOfPossibleMoves.attackMoves, this.color)
     }
 
-    formListOfCoords(coordinates: ICoordinates) {
+    formListOfCoords(board: any, coordinates: ICoordinates) {
         let possibleMoves: ICoordinates[] = []
         let attackMoves: ICoordinates[] = []
 
         // To the top right diagonal
         for (let i = coordinates.i + 1; i < 8; i++) {
             let j = coordinates.j + Math.abs(i - coordinates.i)
-            if (j < 8 && !this.boardService.board[i][j]?.figure) {
+            if (j < 8 && !board[i][j]?.figure) {
                 possibleMoves = [...possibleMoves, {
                     i,
                     j
                 }]
             } else if (j >= 8) {
                 break;
-            } else if (this.boardService.board[i][j]?.figure) {
+            } else if (board[i][j]?.figure) {
                 attackMoves = [...attackMoves, {
                     i,
                     j
@@ -91,14 +94,14 @@ export class BishopComponent implements OnInit {
         // To the top left diagonal
         for (let i = coordinates.i + 1; i < 8; i++) {
             let j = coordinates.j - Math.abs(i - coordinates.i)
-            if (j >= 0 && !this.boardService.board[i][j]?.figure) {
+            if (j >= 0 && !board[i][j]?.figure) {
                 possibleMoves = [...possibleMoves, {
                     i,
                     j
                 }]
             } else if (j < 0) {
                 break;
-            } else if (this.boardService.board[i][j]?.figure) {
+            } else if (board[i][j]?.figure) {
                 attackMoves = [...attackMoves, {
                     i,
                     j
@@ -110,14 +113,14 @@ export class BishopComponent implements OnInit {
         // To the bottom left diagonal
         for (let i = coordinates.i - 1; i >= 0; i--) {
             let j = coordinates.j - Math.abs(i - coordinates.i)
-            if (j >= 0 && !this.boardService.board[i][j]?.figure) {
+            if (j >= 0 && !board[i][j]?.figure) {
                 possibleMoves = [...possibleMoves, {
                     i,
                     j
                 }]
             } else if (j < 0) {
                 break;
-            } else if (this.boardService.board[i][j]?.figure) {
+            } else if (board[i][j]?.figure) {
                 attackMoves = [...attackMoves, {
                     i,
                     j
@@ -128,14 +131,14 @@ export class BishopComponent implements OnInit {
         // To the bottom right diagonal
         for (let i = coordinates.i - 1; i >= 0; i--) {
             let j = coordinates.j + Math.abs(i - coordinates.i)
-            if (j < 8 && !this.boardService.board[i][j]?.figure) {
+            if (j < 8 && !board[i][j]?.figure) {
                 possibleMoves = [...possibleMoves, {
                     i,
                     j
                 }]
             } else if (j >= 8) {
                 break;
-            } else if (this.boardService.board[i][j]?.figure) {
+            } else if (board[i][j]?.figure) {
                 attackMoves = [...attackMoves, {
                     i,
                     j
