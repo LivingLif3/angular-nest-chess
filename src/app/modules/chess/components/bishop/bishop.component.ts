@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, OnInit} from '@angular/core';
+import {ChangeDetectionStrategy, ChangeDetectorRef, Component, DestroyRef, Input, OnInit} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {Colors, ICoordinates} from "../../../../core/types/cell-type";
 import {FiguresType} from "../../../../core/types/figures-type";
@@ -8,6 +8,7 @@ import {ChessBoardService} from "../../../../core/services/chess-board.service";
 import {FigureInfo} from "../../../../core/types/figure-info";
 import {BitBoardService} from "../../../../core/services/bit-board.service";
 import {AbstractFigureDirective} from "../../../../core/directives/abstract-figure/abstract-figure.directive";
+import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 
 @Component({
     selector: 'app-bishop',
@@ -22,6 +23,7 @@ export class BishopComponent extends AbstractFigureDirective implements OnInit {
         private boardService: ChessBoardService,
         private chooseService: ChooseElementService,
         private bitBoardService: BitBoardService,
+        private destroyRef: DestroyRef
     ) {
         super(boardService, chooseService, bitBoardService)
     }
@@ -30,6 +32,7 @@ export class BishopComponent extends AbstractFigureDirective implements OnInit {
         this.imgPath = `${this.color + FiguresType.BISHOP}.png`
 
         this.chooseService.choose$.pipe(
+            takeUntilDestroyed(this.destroyRef),
             filter(figure => figure?.id === this.figure.id)
         ).subscribe(figure => {
             this.boardService.hideAllDots()
@@ -38,6 +41,7 @@ export class BishopComponent extends AbstractFigureDirective implements OnInit {
         })
 
         this.bitBoardService.moveTrigger$.pipe(
+            takeUntilDestroyed(this.destroyRef),
             filter(trigger => trigger !== null && trigger.color === this.color && trigger.status === 'moved' && trigger.id !== this.figure.id!)
         ).subscribe((trigger) => {
             const coordinates = this.boardService.getCoordinatesById(this.figure.id!)
@@ -47,6 +51,7 @@ export class BishopComponent extends AbstractFigureDirective implements OnInit {
         })
 
         this.bitBoardService.checkMoveTrigger$.pipe(
+            takeUntilDestroyed(this.destroyRef),
             filter(trigger => trigger !== null && trigger.moveInfo.color === this.color && trigger.moveInfo.status === 'moved' && trigger.moveInfo.id !== this.figure.id!)
         ).subscribe((trigger) => {
             const coordinates = this.boardService.getCoordinatesById(this.figure.id!)

@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, Component, OnInit} from '@angular/core';
+import {ChangeDetectionStrategy, Component, DestroyRef, OnInit} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ICoordinates} from "../../../../core/types/cell-type";
 import {FiguresType} from "../../../../core/types/figures-type";
@@ -8,6 +8,7 @@ import {BitBoardService} from "../../../../core/services/bit-board.service";
 import {filter} from "rxjs";
 import {CastlingService} from "../../../../core/services/castling.service";
 import {AbstractFigureDirective} from "../../../../core/directives/abstract-figure/abstract-figure.directive";
+import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 
 @Component({
   selector: 'app-rook',
@@ -22,7 +23,8 @@ export class RookComponent extends AbstractFigureDirective implements OnInit{
       private boardService: ChessBoardService,
       private chooseService: ChooseElementService,
       private bitBoardService: BitBoardService,
-      private castlingService: CastlingService
+      private castlingService: CastlingService,
+      private destroyRef: DestroyRef
   ) {
     super(boardService, chooseService, bitBoardService, castlingService)
   }
@@ -31,6 +33,7 @@ export class RookComponent extends AbstractFigureDirective implements OnInit{
     this.imgPath = `${this.color + FiguresType.ROOK}.png`
 
     this.chooseService.choose$.pipe(
+        takeUntilDestroyed(this.destroyRef),
         filter(figure => figure?.id === this.figure.id)
     ).subscribe(figure => {
       const coordinates: ICoordinates = this.boardService.getCoordinatesById(this.figure.id!)
@@ -46,6 +49,7 @@ export class RookComponent extends AbstractFigureDirective implements OnInit{
     })
 
     this.bitBoardService.moveTrigger$.pipe(
+        takeUntilDestroyed(this.destroyRef),
         filter(trigger => trigger !== null && trigger.color === this.color && trigger.status === 'moved' && trigger.id !== this.figure.id!)
     ).subscribe((trigger) => {
       const coordinates = this.boardService.getCoordinatesById(this.figure.id!)
@@ -55,6 +59,7 @@ export class RookComponent extends AbstractFigureDirective implements OnInit{
     })
 
     this.bitBoardService.checkMoveTrigger$.pipe(
+        takeUntilDestroyed(this.destroyRef),
         filter(trigger => trigger !== null && trigger.moveInfo.color === this.color && trigger.moveInfo.status === 'moved' && trigger.moveInfo.id !== this.figure.id!)
     ).subscribe((trigger) => {
       const coordinates = this.boardService.getCoordinatesById(this.figure.id!)

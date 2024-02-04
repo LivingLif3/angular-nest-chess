@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, Component, Input, OnInit} from '@angular/core';
+import {ChangeDetectionStrategy, Component, DestroyRef, Input, OnInit} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {Colors, ICoordinates} from "../../../../core/types/cell-type";
 import {FiguresType} from "../../../../core/types/figures-type";
@@ -8,6 +8,7 @@ import {CastlingService} from "../../../../core/services/castling.service";
 import {filter} from "rxjs";
 import {BitBoardService} from "../../../../core/services/bit-board.service";
 import {AbstractFigureDirective} from "../../../../core/directives/abstract-figure/abstract-figure.directive";
+import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 
 @Component({
     selector: 'app-king',
@@ -25,6 +26,7 @@ export class KingComponent extends AbstractFigureDirective implements OnInit {
         private chooseService: ChooseElementService,
         private bitBoardService: BitBoardService,
         private castlingService: CastlingService,
+        private destroyRef: DestroyRef
     ) {
         super(boardService, chooseService, bitBoardService, castlingService)
     }
@@ -35,6 +37,7 @@ export class KingComponent extends AbstractFigureDirective implements OnInit {
         this.imgPath = `${this.color + FiguresType.KING}.png`
 
         this.chooseService.choose$.pipe(
+            takeUntilDestroyed(this.destroyRef),
             filter(figure => figure?.id === this.figure.id)
         ).subscribe(figure => {
             let coordinates: ICoordinates = this.boardService.getCoordinatesById(this.figure.id!)
@@ -53,6 +56,7 @@ export class KingComponent extends AbstractFigureDirective implements OnInit {
         })
 
         this.bitBoardService.moveTrigger$.pipe(
+            takeUntilDestroyed(this.destroyRef),
             filter(trigger => trigger !== null && trigger.color === this.color && trigger.status === 'moved' && trigger.id !== this.figure.id!)
         ).subscribe(trigger => {
             const coordinates = this.boardService.getCoordinatesById(this.figure.id!)
@@ -63,6 +67,7 @@ export class KingComponent extends AbstractFigureDirective implements OnInit {
         })
 
         this.bitBoardService.checkMoveTrigger$.pipe(
+            takeUntilDestroyed(this.destroyRef),
             filter(trigger => trigger !== null && trigger.moveInfo.color === this.color && trigger.moveInfo.status === 'moved' && trigger.moveInfo.id !== this.figure.id!)
         ).subscribe((trigger) => {
             const coordinates = this.boardService.getCoordinatesById(this.figure.id!)
