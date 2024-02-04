@@ -1,13 +1,12 @@
-import {ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, OnInit} from '@angular/core';
+import {ChangeDetectionStrategy, Component, OnInit} from '@angular/core';
 import { CommonModule } from '@angular/common';
-import {Colors, ICoordinates} from "../../types/cell-type";
-import {FiguresType} from "../../types/figures-type";
-import {FigureInfo} from "../../types/figure-info";
-import {ChessBoardService} from "../../services/chess-board.service";
-import {ChooseElementService} from "../../services/choose-element.service";
+import { ICoordinates} from "../../../../core/types/cell-type";
+import {FiguresType} from "../../../../core/types/figures-type";
+import {ChessBoardService} from "../../../../core/services/chess-board.service";
+import {ChooseElementService} from "../../../../core/services/choose-element.service";
 import {filter} from "rxjs";
-import {BitBoardService} from "../../services/bit-board.service";
-import {trigger} from "@angular/animations";
+import {BitBoardService} from "../../../../core/services/bit-board.service";
+import {AbstractFigureDirective} from "../../../../core/directives/abstract-figure/abstract-figure.directive";
 
 @Component({
   selector: 'app-knight',
@@ -17,18 +16,14 @@ import {trigger} from "@angular/animations";
   styleUrls: ['./knight.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class KnightComponent implements OnInit{
-  @Input() color!: Colors
-
-  @Input() figure!: Partial<FigureInfo>
-
-  imgPath: string = ''
-
+export class KnightComponent extends AbstractFigureDirective implements OnInit{
   constructor(
       private boardService: ChessBoardService,
       private chooseService: ChooseElementService,
-      private bitBoardService: BitBoardService
-  ) {}
+      private bitBoardService: BitBoardService,
+  ) {
+    super(boardService, chooseService, bitBoardService)
+  }
 
   ngOnInit() {
     this.imgPath = `${this.color + FiguresType.KNIGHT}.png`

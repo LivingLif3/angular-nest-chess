@@ -1,19 +1,13 @@
 <div class="board">
   <div *ngFor="let number of boardFigures; let i = index" class="columns">
     <div *ngFor="let element of boardFigures[i]; let j = index" class="row">
-      <app-chess-cell *ngIf="(i + j) % 2 === 0; else white" class="cell" [color]="colors.black"
+      <app-chess-cell
+                      [color]="declareColor({i,j})"
                       [figure]="addId(i*10 + j, element.figure)"
                       [figureInfo]="element"
                       [coords]="{i, j}"
       >
       </app-chess-cell>
-      <ng-template #white>
-        <app-chess-cell [color]="colors.white" [figure]="addId(i*10 + j, element.figure)"
-                        [figureInfo]="element"
-                        [coords]="{i, j}"
-        >
-        </app-chess-cell>
-      </ng-template>
     </div>
   </div>
 </div>

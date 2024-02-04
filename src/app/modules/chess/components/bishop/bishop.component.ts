@@ -1,12 +1,13 @@
-import {ChangeDetectionStrategy, Component, Input, OnInit} from '@angular/core';
+import {ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, OnInit} from '@angular/core';
 import {CommonModule} from '@angular/common';
-import {Colors, ICoordinates} from "../../types/cell-type";
-import {FiguresType} from "../../types/figures-type";
+import {Colors, ICoordinates} from "../../../../core/types/cell-type";
+import {FiguresType} from "../../../../core/types/figures-type";
 import {filter} from "rxjs";
-import {ChooseElementService} from "../../services/choose-element.service";
-import {ChessBoardService} from "../../services/chess-board.service";
-import {FigureInfo} from "../../types/figure-info";
-import {BitBoardService} from "../../services/bit-board.service";
+import {ChooseElementService} from "../../../../core/services/choose-element.service";
+import {ChessBoardService} from "../../../../core/services/chess-board.service";
+import {FigureInfo} from "../../../../core/types/figure-info";
+import {BitBoardService} from "../../../../core/services/bit-board.service";
+import {AbstractFigureDirective} from "../../../../core/directives/abstract-figure/abstract-figure.directive";
 
 @Component({
     selector: 'app-bishop',
@@ -16,19 +17,14 @@ import {BitBoardService} from "../../services/bit-board.service";
     styleUrls: ['./bishop.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class BishopComponent implements OnInit {
-    @Input() color!: Colors
-
-    @Input() figure!: Partial<FigureInfo>
-
+export class BishopComponent extends AbstractFigureDirective implements OnInit {
     constructor(
-        private chooseService: ChooseElementService,
         private boardService: ChessBoardService,
-        private bitBoardService: BitBoardService
+        private chooseService: ChooseElementService,
+        private bitBoardService: BitBoardService,
     ) {
+        super(boardService, chooseService, bitBoardService)
     }
-
-    imgPath: string = ''
 
     ngOnInit() {
         this.imgPath = `${this.color + FiguresType.BISHOP}.png`

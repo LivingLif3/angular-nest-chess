@@ -82,38 +82,22 @@ export class BitBoardService {
 
     checkForChecksForWhite(board: any): boolean {
         const whiteKingCoords = this.boardService.getWhiteKingCoords(board)
-        if (this.blackBitBoard()[whiteKingCoords.i][whiteKingCoords.j]) {
-            return true
-        } else {
-            return false
-        }
+        return Boolean(this.blackBitBoard()[whiteKingCoords.i][whiteKingCoords.j])
     }
 
     checkForChecksForBlack(board: any): boolean {
         const blackKingCoords = this.boardService.getBlackKingCoords(board)
-        if (this.whiteBitBoard()[blackKingCoords.i][blackKingCoords.j]) {
-            return true
-        } else {
-            return false
-        }
+        return Boolean(this.whiteBitBoard()[blackKingCoords.i][blackKingCoords.j])
     }
 
     checkForPredictedMoveChecksForBlack(board: any): boolean {
         const blackKingCoords = this.boardService.getBlackKingCoords(board)
-        if (this.checkBitBoard()[blackKingCoords.i][blackKingCoords.j]) {
-            return true
-        } else {
-            return false
-        }
+        return Boolean(this.checkBitBoard()[blackKingCoords.i][blackKingCoords.j])
     }
 
     checkForPredictedMoveChecksForWhite(board: any): boolean {
         const whiteKingCoords = this.boardService.getWhiteKingCoords(board)
-        if (this.checkBitBoard()[whiteKingCoords.i][whiteKingCoords.j]) {
-            return true
-        } else {
-            return false
-        }
+        return Boolean(this.checkBitBoard()[whiteKingCoords.i][whiteKingCoords.j])
     }
 
     checkWhiteKingCanMakeMove() {

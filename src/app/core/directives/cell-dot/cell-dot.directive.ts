@@ -1,4 +1,4 @@
-import {Directive, ElementRef, Input, OnChanges, Renderer2} from '@angular/core';
+import {Directive, ElementRef, Input, OnChanges, Renderer2, SimpleChanges} from '@angular/core';
 
 @Directive({
   selector: '[appCellDot]'
@@ -12,7 +12,9 @@ export class CellDotDirective implements OnChanges {
     private renderer: Renderer2,
   ) { }
 
-  ngOnChanges() {
+  ngOnChanges(changes:SimpleChanges) {
+    const activeVal = changes['active']
+    if(activeVal.previousValue === activeVal.currentValue) return
     if(this.active) {
       this.renderer.addClass(this.element.nativeElement, 'dot')
     }

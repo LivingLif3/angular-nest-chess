@@ -1,21 +1,16 @@
 import {
-  ChangeDetectionStrategy,
-  ChangeDetectorRef,
-  Component, DestroyRef,
-  Input,
-  OnChanges, OnDestroy,
+  ChangeDetectionStrategy, ChangeDetectorRef,
+  Component, OnDestroy,
   OnInit,
-  SimpleChanges
 } from '@angular/core';
 import {CommonModule} from '@angular/common';
-import {Colors, ICoordinates} from "../../types/cell-type";
-import {FiguresType} from "../../types/figures-type";
-import {ChessBoardService} from "../../services/chess-board.service";
-import {ChooseElementService} from "../../services/choose-element.service";
-import {FigureInfo} from "../../types/figure-info";
-import {ShowDotsService} from "../../services/show-dots.service";
+import {Colors, ICoordinates} from "../../../../core/types/cell-type";
+import {FiguresType} from "../../../../core/types/figures-type";
+import {ChessBoardService} from "../../../../core/services/chess-board.service";
+import {ChooseElementService} from "../../../../core/services/choose-element.service";
 import {filter, Subject, takeUntil} from "rxjs";
-import {BitBoardService} from "../../services/bit-board.service";
+import {BitBoardService} from "../../../../core/services/bit-board.service";
+import {AbstractFigureDirective} from "../../../../core/directives/abstract-figure/abstract-figure.directive";
 
 @Component({
   selector: 'app-pawn',
@@ -25,32 +20,25 @@ import {BitBoardService} from "../../services/bit-board.service";
   styleUrls: ['./pawn.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class PawnComponent implements OnInit, OnDestroy {
-  @Input() color!: Colors
-
-  @Input() figure!: Partial<FigureInfo>
-
+export class PawnComponent extends AbstractFigureDirective implements OnInit, OnDestroy {
   private ngUnsubscribe = new Subject();
 
   firstMove: boolean = true
-
-  imgPath: string = ''
 
   startCoordinateY!: Number;
 
   constructor(
     private boardService: ChessBoardService,
     private chooseService: ChooseElementService,
-    private showDotsService: ShowDotsService,
     private bitBoardService: BitBoardService,
-    private ref: ChangeDetectorRef
   ) {
+    super(boardService, chooseService, bitBoardService)
   }
 
   ngOnInit() {
     this.startCoordinateY = this.color === Colors.WHITE ? 1 : 6;
-
     this.imgPath = `${this.color + FiguresType.PAWN}.png`
+
     this.chooseService.choose$.subscribe(figure => {
       let coordinates = this.boardService.getCoordinatesById(this.figure.id!);
       if(figure?.id === this.figure.id) {
@@ -60,12 +48,11 @@ export class PawnComponent implements OnInit, OnDestroy {
           this.firstMove = false;
         }
         if(this.firstMove) {
-         this.showDotsWrapper(2)
+         this.showDots(2)
         } else {
-          this.showDotsWrapper(1)
+          this.showDots(1)
         }
         this.showAttackMoves(coordinates)
-        this.ref.markForCheck()
       }
     })
 
@@ -88,7 +75,7 @@ export class PawnComponent implements OnInit, OnDestroy {
     })
   }
 
-  showDotsWrapper(count: number) {
+  showDots(count: number): void {
     let coordinates = this.boardService.getCoordinatesById(this.figure.id!)
     if(this.color === Colors.WHITE) {
       this.showDotsWhite(count, coordinates);

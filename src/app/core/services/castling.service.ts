@@ -1,5 +1,6 @@
 import {computed, Injectable, signal} from '@angular/core';
 import {Colors} from "../types/cell-type";
+import {listOfCastlingBlackCells, listOfCastlingWhiteCells} from "../constants/listOfCatlingCells";
 
 @Injectable({
     providedIn: 'root'
@@ -19,68 +20,6 @@ export class CastlingService {
         kingFirstMoved: false,
         madeCastling: false
     })
-
-    private listOfCastlingWhiteCells = [
-        {
-            king: {
-                i: 0,
-                j: 6
-            },
-            rook: {
-                i: 0,
-                j: 5,
-                startCoords: {
-                    i: 0,
-                    j: 7
-                }
-            }
-        },
-        {
-            king: {
-                i: 0,
-                j: 2
-            },
-            rook: {
-                i: 0,
-                j: 3,
-                startCoords: {
-                    i: 0,
-                    j: 0
-                }
-            }
-        }
-    ]
-
-    private listOfCastlingBlackCells = [
-        {
-            king: {
-                i: 7,
-                j: 6
-            },
-            rook: {
-                i: 7,
-                j: 5,
-                startCoords: {
-                    i: 7,
-                    j: 7
-                }
-            }
-        },
-        {
-            king: {
-                i: 7,
-                j: 2
-            },
-            rook: {
-                i: 7,
-                j: 3,
-                startCoords: {
-                    i: 7,
-                    j: 0
-                }
-            }
-        }
-    ]
 
     rooksSides = {
         [Colors.WHITE]: [
@@ -106,8 +45,8 @@ export class CastlingService {
     }
 
     castlingCells = {
-        [Colors.WHITE]: this.listOfCastlingWhiteCells,
-        [Colors.BLACK]: this.listOfCastlingBlackCells
+        [Colors.WHITE]: listOfCastlingWhiteCells,
+        [Colors.BLACK]: listOfCastlingBlackCells
     }
 
     checkWhiteCastlingRightRook = computed(() => !this.whiteState().rightRookFirstMoved && !this.whiteState().kingFirstMoved && !this.whiteState().madeCastling)

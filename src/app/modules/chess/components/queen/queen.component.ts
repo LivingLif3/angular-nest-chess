@@ -1,12 +1,13 @@
 import {ChangeDetectionStrategy, Component, Input, OnInit} from '@angular/core';
 import {CommonModule} from '@angular/common';
-import {Colors, ICoordinates} from "../../types/cell-type";
-import {FiguresType} from "../../types/figures-type";
-import {ChessBoardService} from "../../services/chess-board.service";
-import {ChooseElementService} from "../../services/choose-element.service";
-import {FigureInfo} from "../../types/figure-info";
+import {Colors, ICoordinates} from "../../../../core/types/cell-type";
+import {FiguresType} from "../../../../core/types/figures-type";
+import {ChessBoardService} from "../../../../core/services/chess-board.service";
+import {ChooseElementService} from "../../../../core/services/choose-element.service";
+import {FigureInfo} from "../../../../core/types/figure-info";
 import {filter} from "rxjs";
-import {BitBoardService} from "../../services/bit-board.service";
+import {BitBoardService} from "../../../../core/services/bit-board.service";
+import {AbstractFigureDirective} from "../../../../core/directives/abstract-figure/abstract-figure.directive";
 
 @Component({
     selector: 'app-queen',
@@ -16,18 +17,13 @@ import {BitBoardService} from "../../services/bit-board.service";
     styleUrls: ['./queen.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class QueenComponent implements OnInit {
-    @Input() color!: Colors
-
-    @Input() figure!: Partial<FigureInfo>
-
-    imgPath: string = ''
-
+export class QueenComponent extends AbstractFigureDirective implements OnInit {
     constructor(
         private boardService: ChessBoardService,
         private chooseService: ChooseElementService,
         private bitBoardService: BitBoardService
     ) {
+        super(boardService, chooseService, bitBoardService)
     }
 
     ngOnInit() {

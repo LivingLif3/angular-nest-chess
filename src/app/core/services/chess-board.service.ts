@@ -8,7 +8,7 @@ import {CreateFigureService} from "./create-figure.service";
 })
 export class ChessBoardService {
 
-    board = [
+    board: any = [
         [
             {
                 figure: this.createFigure.createFigure(FiguresType.ROOK, Colors.WHITE),
@@ -59,19 +59,31 @@ export class ChessBoardService {
         Array(8).fill({
             figure: null,
             active: false
-        }), // 3
+        }).map(el => ({
+            figure: null,
+            active: false
+        })), // 3
         Array(8).fill({
             figure: null,
             active: false
-        }), // 4
+        }).map(el => ({
+            figure: null,
+            active: false
+        })), // 4
         Array(8).fill({
             figure: null,
             active: false
-        }), // 5
+        }).map(el => ({
+            figure: null,
+            active: false
+        })), // 5
         Array(8).fill({
             figure: null,
             active: false
-        }), // 6
+        }).map(el => ({
+            figure: null,
+            active: false,
+        })), // 6
         Array(8).fill(0).map(el => ({
             figure: this.createFigure.createFigure(FiguresType.PAWN, Colors.BLACK),
             firstMove: true
@@ -126,6 +138,17 @@ export class ChessBoardService {
     }
 
     constructor(private createFigure: CreateFigureService) {
+    }
+
+    formRowOfIndependentCells() {
+        const row = []
+        for(let i = 0; i < 8; i++) {
+            row.push({
+                figure: null,
+                active: false
+            })
+        }
+        return row
     }
 
     getCoordinatesById(id: number): ICoordinates {

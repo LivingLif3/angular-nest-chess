@@ -1,22 +1,33 @@
-import {ChangeDetectionStrategy, Component, Input} from '@angular/core';
+import {
+  AfterViewChecked,
+  AfterViewInit,
+  ChangeDetectionStrategy, ChangeDetectorRef,
+  Component,
+  Injector,
+  Input,
+  OnInit, Type,
+  ViewChild,
+  ViewContainerRef
+} from '@angular/core';
 import {CommonModule} from '@angular/common';
-import {Colors, ICoordinates} from "../../types/cell-type";
-import {CellColorModule} from "../../directives/cell-color/cell-color.module";
-import {FigureInfo} from "../../types/figure-info";
+import {Colors, ICoordinates} from "../../../../core/types/cell-type";
+import {CellColorModule} from "../../../../core/directives/cell-color/cell-color.module";
+import {FigureInfo} from "../../../../core/types/figure-info";
 import {PawnComponent} from "../pawn/pawn.component";
 import {RookComponent} from "../rook/rook.component";
 import {KnightComponent} from "../knight/knight.component";
 import {BishopComponent} from "../bishop/bishop.component";
 import {QueenComponent} from "../queen/queen.component";
 import {KingComponent} from "../king/king.component";
-import {CellDotModule} from "../../directives/cell-dot/cell-dot.module";
-import {ChessBoardService} from "../../services/chess-board.service";
-import {ChooseElementService} from "../../services/choose-element.service";
+import {CellDotModule} from "../../../../core/directives/cell-dot/cell-dot.module";
+import {ChessBoardService} from "../../../../core/services/chess-board.service";
+import {ChooseElementService} from "../../../../core/services/choose-element.service";
 import {first} from "rxjs";
-import {BitBoardService} from "../../services/bit-board.service";
-import {FiguresType} from "../../types/figures-type";
-import {CastlingService} from "../../services/castling.service";
-import {CellAttackCircleModule} from "../../directives/cell-attack-circle/cell-attack-circle.module";
+import {BitBoardService} from "../../../../core/services/bit-board.service";
+import {FiguresType} from "../../../../core/types/figures-type";
+import {CastlingService} from "../../../../core/services/castling.service";
+import {CellAttackCircleModule} from "../../../../core/directives/cell-attack-circle/cell-attack-circle.module";
+import {AbstractFigureDirective} from "../../../../core/directives/abstract-figure/abstract-figure.directive";
 
 @Component({
   selector: 'app-chess-cell',
@@ -26,7 +37,7 @@ import {CellAttackCircleModule} from "../../directives/cell-attack-circle/cell-a
   styleUrls: ['./chess-cell.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class ChessCellComponent {
+export class ChessCellComponent implements AfterViewInit {
   @Input() color!: Colors
 
   @Input() figure!: Partial<FigureInfo> | null
@@ -35,12 +46,39 @@ export class ChessCellComponent {
 
   @Input() coords!: ICoordinates
 
+  @ViewChild('renderedFigure', { read: ViewContainerRef })
+  renderedFigure!: ViewContainerRef
+
+  renderFigures: Record<FiguresType, Type<AbstractFigureDirective>> = {
+    [FiguresType.PAWN]: PawnComponent,
+    [FiguresType.KNIGHT]: KnightComponent,
+    [FiguresType.BISHOP]: BishopComponent,
+    [FiguresType.QUEEN]: QueenComponent,
+    [FiguresType.KING]: KingComponent,
+    [FiguresType.ROOK]: RookComponent
+  }
+
   constructor(
     private boardService: ChessBoardService,
     private chooseService: ChooseElementService,
     private bitBoardService: BitBoardService,
-    private castlingService: CastlingService
+    private castlingService: CastlingService,
+    private ref: ChangeDetectorRef
   ) {
+  }
+
+  ngAfterViewInit() {
+    if (this.figure) {
+      this.createFigure()
+      this.ref.detectChanges()
+    }
+  }
+
+  createFigure() {
+    this.renderedFigure.clear()
+    const componentRef = this.renderedFigure.createComponent<AbstractFigureDirective>(this.renderFigures[this.figure!.type!])
+    componentRef.instance['color'] = this.figure!.color!
+    componentRef.instance['figure'] = this.figure!
   }
 
   getActiveStatus() {
@@ -55,15 +93,6 @@ export class ChessCellComponent {
     let currentCell = this.boardService.board[this.coords.i][this.coords.j]
     if(this.getActiveStatus()) {
       this.chooseService.choose$.pipe(first()).subscribe(figure => {
-        // if(figure?.color! === Colors.WHITE) {
-        //   if(this.bitBoardService.checkForChecksForWhite(this.boardService.board)) {
-        //     // console.log("here") //сюда попадаем и поэтому не ходим
-        //   }
-        // } else {
-        //   if(this.bitBoardService.checkForChecksForBlack(this.boardService.board)) {
-        //
-        //   }
-        // }
         if(!this.canMakeMove(currentCell, figure!, figure?.color!)) {
           return
         }
@@ -97,8 +126,6 @@ export class ChessCellComponent {
         }
         // this.bitBoardService.clearWhiteBitBoard()
         let figureCoords = this.boardService.getCoordinatesById(figure!.id)
-        console.log(figure)
-        console.log(currentCell)
         this.boardService.board[this.coords.i][this.coords.j] = {...this.boardService.board[figureCoords.i][figureCoords.j]}
         this.boardService.board[figureCoords.i][figureCoords.j] = {...currentCell}
         this.boardService.hideAllDots();
@@ -111,8 +138,6 @@ export class ChessCellComponent {
           return
         }
         let figureCoords = this.boardService.getCoordinatesById(figure!.id)
-        console.log(figure)
-        console.log(currentCell)
         this.boardService.board[this.coords.i][this.coords.j] = {...this.boardService.board[figureCoords.i][figureCoords.j]}
         this.boardService.board[figureCoords.i][figureCoords.j] = {
           figure: null,

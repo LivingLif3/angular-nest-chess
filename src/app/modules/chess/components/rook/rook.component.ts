@@ -1,13 +1,13 @@
-import {ChangeDetectionStrategy, Component, Input, OnInit} from '@angular/core';
+import {ChangeDetectionStrategy, Component, OnInit} from '@angular/core';
 import { CommonModule } from '@angular/common';
-import {Colors, ICoordinates} from "../../types/cell-type";
-import {FiguresType} from "../../types/figures-type";
-import {ChessBoardService} from "../../services/chess-board.service";
-import {ChooseElementService} from "../../services/choose-element.service";
-import {BitBoardService} from "../../services/bit-board.service";
+import { ICoordinates} from "../../../../core/types/cell-type";
+import {FiguresType} from "../../../../core/types/figures-type";
+import {ChessBoardService} from "../../../../core/services/chess-board.service";
+import {ChooseElementService} from "../../../../core/services/choose-element.service";
+import {BitBoardService} from "../../../../core/services/bit-board.service";
 import {filter} from "rxjs";
-import {FigureInfo} from "../../types/figure-info";
-import {CastlingService} from "../../services/castling.service";
+import {CastlingService} from "../../../../core/services/castling.service";
+import {AbstractFigureDirective} from "../../../../core/directives/abstract-figure/abstract-figure.directive";
 
 @Component({
   selector: 'app-rook',
@@ -17,18 +17,14 @@ import {CastlingService} from "../../services/castling.service";
   styleUrls: ['./rook.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class RookComponent implements OnInit{
-  @Input() color!: Colors
-  @Input() figure!: Partial<FigureInfo>
-
-  imgPath: string = ''
-
+export class RookComponent extends AbstractFigureDirective implements OnInit{
   constructor(
       private boardService: ChessBoardService,
       private chooseService: ChooseElementService,
       private bitBoardService: BitBoardService,
       private castlingService: CastlingService
   ) {
+    super(boardService, chooseService, bitBoardService, castlingService)
   }
 
   ngOnInit() {

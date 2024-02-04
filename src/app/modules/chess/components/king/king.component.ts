@@ -1,13 +1,13 @@
 import {ChangeDetectionStrategy, Component, Input, OnInit} from '@angular/core';
 import {CommonModule} from '@angular/common';
-import {Colors, ICoordinates} from "../../types/cell-type";
-import {FiguresType} from "../../types/figures-type";
-import {FigureInfo} from "../../types/figure-info";
-import {ChessBoardService} from "../../services/chess-board.service";
-import {ChooseElementService} from "../../services/choose-element.service";
-import {CastlingService} from "../../services/castling.service";
-import {filter, takeUntil} from "rxjs";
-import {BitBoardService} from "../../services/bit-board.service";
+import {Colors, ICoordinates} from "../../../../core/types/cell-type";
+import {FiguresType} from "../../../../core/types/figures-type";
+import {ChessBoardService} from "../../../../core/services/chess-board.service";
+import {ChooseElementService} from "../../../../core/services/choose-element.service";
+import {CastlingService} from "../../../../core/services/castling.service";
+import {filter} from "rxjs";
+import {BitBoardService} from "../../../../core/services/bit-board.service";
+import {AbstractFigureDirective} from "../../../../core/directives/abstract-figure/abstract-figure.directive";
 
 @Component({
     selector: 'app-king',
@@ -17,21 +17,16 @@ import {BitBoardService} from "../../services/bit-board.service";
     styleUrls: ['./king.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class KingComponent implements OnInit {
-    @Input() color!: Colors
-
-    @Input() figure!: Partial<FigureInfo>
-
-    imgPath: string = ''
-
+export class KingComponent extends AbstractFigureDirective implements OnInit {
     startCoord!: ICoordinates
 
     constructor(
         private boardService: ChessBoardService,
         private chooseService: ChooseElementService,
+        private bitBoardService: BitBoardService,
         private castlingService: CastlingService,
-        private bitBoardService: BitBoardService
     ) {
+        super(boardService, chooseService, bitBoardService, castlingService)
     }
 
     ngOnInit() {
